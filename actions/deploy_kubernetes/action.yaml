@@ -79,7 +79,7 @@ runs:
       run: |
         rm -f kustomization.yaml
         kustomize create --autodetect --recursive --namespace go-webserver
-        kustomize edit set image deploy/image=$image_name
+        kustomize edit set image deploy/image=${{ steps.data.outputs.image_name }}
         kustomize build .
 
     # - name: Push image to Amazon ECR
