@@ -123,7 +123,7 @@ runs:
         echo "git remote remove"
         git remote remove origin
         echo "git remote add"
-        git remote add origin https://${{ inputs.github_token }}@github.com/nandoin/argocd
+        git remote add origin https://${{ inputs.github_token }}@github.com/nandoin/argocd.git
         while [ $COUNT -lt $RETRIES ]; do
           echo "Pushing ..."
           set +e
