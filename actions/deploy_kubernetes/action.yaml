@@ -96,26 +96,25 @@ runs:
     #     git add .
     #     git commit -am "deploy ${{ inputs.environment }} ${{ inputs.namespace }} ${{ inputs.name }} " || echo "Nothing to push"
 
-    - name: GitHub Commit & Push
-      uses: actions-js/push@v1.4
+    - name: Pushes to another repository
+      uses: cpina/github-action-push-to-another-repository@main
+      env:
+        API_TOKEN_GITHUB: ${{ inputs.github_token }}
       with:
-        github_token: ${{ inputs.github_token }}
-        branch: main
-        #force: true
-        directory: ./argocd
-        repository: nandoin/argocd
-        author_name: "kustomize deploy"
-        author_email: "kustomize@deploy.com"
-        message: "deploy ${{ inputs.environment }} ${{ inputs.namespace }} ${{ inputs.name }}"
+        source-directory: './argocd'
+        destination-github-username: 'nandoin'
+        destination-repository-name: 'argocd'
+        user-email: kustomize@argo.cd
+        target-branch: main
 
-    - name: Git push
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ inputs.github_token }}
-        branch: main
-        force: true
-        directory: ./argocd
-        repository: nandoin/argocd
+    # - name: Git push
+    #   uses: ad-m/github-push-action@master
+    #   with:
+    #     github_token: ${{ inputs.github_token }}
+    #     branch: main
+    #     force: true
+    #     directory: ./argocd
+    #     repository: nandoin/argocd
 
 
     # - name: Push Git Repo
