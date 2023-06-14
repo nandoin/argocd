@@ -87,21 +87,46 @@ runs:
     #     docker image tag ${{ inputs.image }} ${{ steps.data.outputs.image_name }} 
     #     docker push ${{ steps.data.outputs.image_name }}
 
-    - name: Git commit
+    # - name: Git commit
+    #   shell: bash
+    #   working-directory: ./argocd
+    #   run: |
+    #     git config --local user.email "nandoin@live.com"
+    #     git config --local user.name "kustomize deploy"
+    #     git add .
+    #     git commit -am "deploy ${{ inputs.environment }} ${{ inputs.namespace }} ${{ inputs.name }} " || echo "Nothing to push"
+
+    # - name: Git push
+    #   uses: ad-m/github-push-action@master
+    #   with:
+    #     github_token: ${{ inputs.github_token }}
+    #     branch: main
+    #     force: true
+    #     directory: ./argocd
+    #     repository: nandoin/argocd
+
+
+    - name: Push Git Repo
       shell: bash
+      env:
+        RETRIES: 3
+        COUNT: 0
       working-directory: ./argocd
       run: |
-        git config --local user.email "nandoin@live.com"
-        git config --local user.name "kustomize deploy"
+        git config user.name action-deploy-${{ inputs.type }}
+        git config user.email action-deploy-${{ inputs.type }}@company.com
         git add .
-        git commit -am "deploy ${{ inputs.environment }} ${{ inputs.namespace }} ${{ inputs.name }} " || echo "Nothing to push"
-
-    - name: Git push
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ inputs.github_token }}
-        branch: main
-        force: true
-        directory: ./argocd
-        repository: nandoin/argocd
-    
+        git commit -m  "deploy ${{ inputs.environment }} ${{ inputs.namespace }} ${{ inputs.name }}" || echo "Nothing to push"
+        while [ $COUNT -lt $RETRIES ]; do
+          echo "Pushing ..."
+          set +e
+          git pull --rebase origin main && git push origin main; EC=$?
+          set -e
+          if [ $EC -eq 0 ]; then
+            RETRIES=0
+            break
+          fi
+          COUNT=$(($COUNT + 1))
+          sleep $((RANDOM % 10))
+          echo "Retrying $COUNT ..."
+        done   
