@@ -22,9 +22,9 @@ inputs:
   #   description: (Opitional) Number of AWS account
   #   required: false
   #   default: 123456789012
-  # github_token:
-  #   description: (Required) github token"
-  #   required: true
+  github_token:
+    description: (Required) github token"
+    required: true
   # aws-region:
   #   description: (Optional) AWS Region, the default is us-east-1
   #   required: false
@@ -99,7 +99,7 @@ runs:
     - name: Git push
       uses: ad-m/github-push-action@master
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ inputs.github_token }}
         branch: main
         force: true
         directory: ./argocd
