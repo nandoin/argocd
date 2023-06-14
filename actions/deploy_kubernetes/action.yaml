@@ -118,6 +118,12 @@ runs:
         git add .
         git status
         git commit -m  "deploy ${{ inputs.environment }} ${{ inputs.namespace }} ${{ inputs.name }}" || echo "Nothing to push"
+        echo "git remote list"
+        git remote -v
+        echo "git remote remove"
+        git remote remove origin
+        echo "git remote add"
+        git remote add origin https://${{ inputs.github_token }}@github.com/nandoin/argocd
         while [ $COUNT -lt $RETRIES ]; do
           echo "Pushing ..."
           set +e
