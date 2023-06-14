@@ -76,7 +76,7 @@ runs:
       working-directory: ./argocd/deployments/${{ inputs.environment }}/${{ inputs.namespace }}/${{ inputs.name }}
       run: |
         rm -f kustomization.yaml
-        kustomize create --autodetect --recursive --namespace go-webserver
+        kustomize create --autodetect --recursive --namespace ${{ inputs.namespace }}
         kustomize edit set image deploy/image=${{ steps.data.outputs.image_name }}
         kustomize build .
 
@@ -89,6 +89,7 @@ runs:
 
     - name: Git commit
       shell: bash
+      working-directory: ./argocd
       run: |
         git config --local user.email "nandoin@live.com"
         git config --local user.name "kustomize deploy"
@@ -96,5 +97,6 @@ runs:
         git commit -am "deploy ${{ inputs.environment }} ${{ inputs.namespace }} ${{ inputs.name }} " || echo "Nothing to push"
 
     - name: Git push
+      working-directory: ./argocd
       uses: ad-m/github-push-action@master
     
