@@ -97,6 +97,11 @@ runs:
         git commit -am "deploy ${{ inputs.environment }} ${{ inputs.namespace }} ${{ inputs.name }} " || echo "Nothing to push"
 
     - name: Git push
-      working-directory: ./argocd
       uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: main
+        force: true
+        directory: ./argocd
+        repository: nandoin/argocd
     
