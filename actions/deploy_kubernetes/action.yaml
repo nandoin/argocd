@@ -116,6 +116,7 @@ runs:
         git config user.name action-deploy-${{ inputs.type }}
         git config user.email action-deploy-${{ inputs.type }}@company.com
         git add .
+        git status
         git commit -m  "deploy ${{ inputs.environment }} ${{ inputs.namespace }} ${{ inputs.name }}" || echo "Nothing to push"
         while [ $COUNT -lt $RETRIES ]; do
           echo "Pushing ..."
