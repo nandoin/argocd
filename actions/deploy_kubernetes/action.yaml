@@ -92,6 +92,7 @@ runs:
       run: |
         git config --local user.email "nandoin@live.com"
         git config --local user.name "kustomize deploy"
+        git add .
         git commit -am "deploy ${{ inputs.environment }} ${{ inputs.namespace }} ${{ inputs.name }} " || echo "Nothing to push"
 
     - name: Git push
