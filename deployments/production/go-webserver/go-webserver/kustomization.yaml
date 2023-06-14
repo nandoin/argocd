@@ -2,9 +2,10 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - deployment.yaml
+- server/.gitkeep
 - service.yaml
 namespace: go-webserver
 images:
 - name: deploy/image
-  newName: luizfernandomarques/go-webserver
-  newTag: "123"
+  newName: luizfernadomarques/go-webserver
+  newTag: ee6400fcaab93e6380beba4c747845774585cf7e
