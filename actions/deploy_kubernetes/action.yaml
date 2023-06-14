@@ -99,7 +99,7 @@ runs:
     - name: Pushes to another repository
       uses: cpina/github-action-push-to-another-repository@main
       env:
-        API_TOKEN_GITHUB: ${{ inputs.github_token }}
+        SSH_DEPLOY_KEY: ${{ inputs.github_token }}
       with:
         source-directory: './argocd'
         destination-github-username: 'nandoin'
