@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: go-webserver
-        image: image
+        image: deploy/image
         resources:
           limits:
             memory: "128Mi"

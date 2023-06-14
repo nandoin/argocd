@@ -1,0 +1,116 @@
+name: 'Deploy Kubernetes'
+description: 'Package action to deploy Kubernetes Resources'
+
+inputs:
+  name:
+    description: (Required) EKS application name
+    required: true
+  namespace:
+    description: (Required) EKS namespace
+    required: true
+  version:
+    description: (Required) Version of deploy, the default to full commit hash
+    required: true
+    #default: ${GITHUB_SHA}
+  image:
+    description: (Required) Tag of image, the default is "image:latest"
+    required: true
+  environment:
+    description: (Required) Context environmnent, ex "production" or "development"
+    required: true
+  # account:
+  #   description: (Opitional) Number of AWS account
+  #   required: false
+  #   default: 123456789012
+  # github_token:
+  #   description: (Required) github token"
+  #   required: true
+  # aws-region:
+  #   description: (Optional) AWS Region, the default is us-east-1
+  #   required: false
+  #   default: us-east-1
+  # aws-role-to-assume:
+  #   description: (Optional) IAM Role used to fetch an access token from AWS (Github OIDC Provider)
+  #   required: false
+  #   default: github-action-deploy 
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout nandoin/argocd
+      uses: actions/checkout@v3
+      with:
+        repository: nandoin/argocd
+        ref: main
+        #token: ${{ inputs.github_token }}
+        path: ./argocd
+
+    - name: Data
+      shell: bash
+      id: data
+      run: |
+
+          echo "image=$(echo ${{ inputs.image }} | cut -f1 -d":")" >> $GITHUB_OUTPUT
+          image_name="luizfernadomarques/$(echo ${{ inputs.image }} | cut -f1 -d":"):${{ inputs.version }}"" #for dockerhub
+          #image_name="dkr.ecr.${{ inputs.aws-region }}.amazonaws.com/$(echo ${{ inputs.image }} | cut -f1 -d":"):${{ inputs.version }}" #for aws
+          echo "image_name=$image_name" >> $GITHUB_OUTPUT
+          #echo "image_name=$account.$image_name" >> $GITHUB_OUTPUT # for aws
+
+    # to aws
+    # - name: Configure AWS Credentials
+    #   uses: aws-actions/configure-aws-credentials@v1
+    #   with: 
+    #     aws-region: ${{ inputs.aws-region }}
+    #     role-to-assume: arn:aws:iam::${{ steps.data.outputs.account }}:role/${{ inputs.aws-role-to-assume }}
+
+    # - name: Login to Amazon ECR
+    #   id: login-ecr
+    #   uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Install Kustomize
+      shell: bash
+      run: |
+        if [[ -f "kustomize" ]]; then
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
+        fi 
+
+    - name: Apply Kustomize Project
+      shell: bash
+      working-directory: ./argocd/deployments/${{ inputs.environment }}/${{ inputs.namespace }}/${{ inputs.name }}
+      run: |
+        rm -f kustomization.yaml
+        kustomize create --autodetect --recursive --namespace go-webserver
+        kustomize edit set image deploy/image=$image_name
+        kustomize build .
+
+    # - name: Push image to Amazon ECR
+    #   shell: bash
+    #   run: |
+    #     aws ecr describe-repositories --repository-names ${{ steps.data.outputs.image }} || aws ecr create-repository --repository-name ${{ steps.data.outputs.image }}
+    #     docker image tag ${{ inputs.image }} ${{ steps.data.outputs.image_name }} 
+    #     docker push ${{ steps.data.outputs.image_name }}
+
+    - name: Push Git Repo
+      shell: bash
+      env:
+        RETRIES: "3"
+        COUNT: "0"
+      working-directory: ./argocd
+      run: |
+        git config user.name action-deploy-server
+        git config user.email action-deploy-server@company.com
+        git add .
+        git commit -m  "deploy ${{ inputs.environment }} ${{ inputs.namespace }} ${{ inputs.name }} " || echo "Nothing to push"
+        while [ $COUNT -lt $RETRIES ]; do
+          echo "Pushing ..."
+          set +e
+          git pull --rebase origin main && git push origin main; EC=$?
+          set -e
+          if [ $EC -eq 0 ]; then
+            RETRIES=0
+            break
+          fi
+          COUNT=$(($COUNT + 1))
+          sleep $((RANDOM % 10))
+          echo "Retrying $COUNT ..."
+        done
