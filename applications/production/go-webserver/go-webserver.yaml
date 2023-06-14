@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: go-webserver
+  namespace: argocd
+  annotations: 
+    argocd.argoproj.io/manifest-generate-paths: . 
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/nandoin/go-webserver.git
+    targetRevision: HEAD
+    path: deployments/production/go-webserver
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: go-webserver
+  syncPolicy:
+    automated:
+      prune: true
+      allowEmpty: true
