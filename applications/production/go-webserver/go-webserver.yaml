@@ -8,7 +8,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/nandoin/go-webserver.git
+    repoURL: https://github.com/nandoin/argocd.git
     targetRevision: HEAD
     path: deployments/production/go-webserver
   destination:
