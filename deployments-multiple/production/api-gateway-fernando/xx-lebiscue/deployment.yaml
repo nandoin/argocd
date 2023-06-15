@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xx-lebiscue
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: xx-lebiscue
+  template:
+    metadata:
+      labels:
+        app: xx-lebiscue
+    spec:
+      containers:
+        - name: xx-lebiscue
+          image: deploy/image
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 8090

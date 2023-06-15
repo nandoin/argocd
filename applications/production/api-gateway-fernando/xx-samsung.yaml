@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: xx-samsung-api-gateway-fernando
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/manifest-generate-paths: .
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/nandoin/argocd.git
+    targetRevision: HEAD
+    path: deployments/production/api-gateway-fernando/xx-samsung
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: xx-samsung
+  syncPolicy:
+    automated:
+      prune: true
+      allowEmpty: true

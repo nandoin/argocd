@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xx-gympass
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: xx-gympass
+  template:
+    metadata:
+      labels:
+        app: xx-gympass
+    spec:
+      containers:
+        - name: xx-gympass
+          image: deploy/image
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 8090

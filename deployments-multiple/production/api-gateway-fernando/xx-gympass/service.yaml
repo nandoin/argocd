@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: xx-gympass
+spec:
+  selector:
+    app: xx-gympass
+  ports:
+    - port: 80
+      targetPort: 8090

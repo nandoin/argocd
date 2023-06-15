@@ -1,0 +1,150 @@
+name: "Deploy Kubernetes"
+description: "Package action to deploy Kubernetes Resources"
+
+inputs:
+  name:
+    description: (Required) EKS application name
+    required: true
+  version:
+    description: (Required) Version of deploy, the default to full commit hash
+    required: true
+    #default: ${GITHUB_SHA}
+  image:
+    description: (Required) Tag of image, the default is "image:latest"
+    required: true
+  environment:
+    description: (Required) Context environmnent, ex "production" or "development"
+    required: true
+  # account:
+  #   description: (Opitional) Number of AWS account
+  #   required: false
+  #   default: 123456789012
+  github_token:
+    description: (Required) github token"
+    required: true
+  # aws-region:
+  #   description: (Optional) AWS Region, the default is us-east-1
+  #   required: false
+  #   default: us-east-1
+  # aws-role-to-assume:
+  #   description: (Optional) IAM Role used to fetch an access token from AWS (Github OIDC Provider)
+  #   required: false
+  #   default: github-action-deploy
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout nandoin/argocd
+      uses: actions/checkout@v3
+      with:
+        repository: nandoin/argocd
+        ref: main
+        #token: ${{ inputs.github_token }}
+        path: ./argocd
+
+    - name: Data
+      shell: bash
+      id: data
+      run: |
+        echo "image=$(echo ${{ inputs.image }} | cut -f1 -d":")" >> $GITHUB_OUTPUT
+        image_name="luizfernadomarques/$(echo ${{ inputs.image }} | cut -f1 -d":"):${{ inputs.version }}"
+        echo "image_name=$image_name" >> $GITHUB_OUTPUT
+
+    # to aws
+    # - name: Configure AWS Credentials
+    #   uses: aws-actions/configure-aws-credentials@v1
+    #   with:
+    #     aws-region: ${{ inputs.aws-region }}
+    #     role-to-assume: arn:aws:iam::${{ steps.data.outputs.account }}:role/${{ inputs.aws-role-to-assume }}
+
+    # - name: Login to Amazon ECR
+    #   id: login-ecr
+    #   uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Install Kustomize
+      shell: bash
+      run: |
+        if [[ -f "kustomize" ]]; then
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
+        fi
+
+    - name: Apply Kustomize Project
+      shell: bash
+      working-directory: ./argocd/deployments-multiple/${{ inputs.environment }}/${{ inputs.name }}
+      run: |
+        rm -rf */kustomization.yaml
+        namespaces=$(ls -d */ | cut -f1 -d"/")
+        for namespace in $namespaces; do
+          cd $namespace && 
+          kustomize create --autodetect --recursive --namespace $(namespace) 
+          kustomize edit set image deploy/image=${{ steps.data.outputs.image_name }}
+          && cd ..
+        done
+
+    # - name: Push image to Amazon ECR
+    #   shell: bash
+    #   run: |
+    #     aws ecr describe-repositories --repository-names ${{ steps.data.outputs.image }} || aws ecr create-repository --repository-name ${{ steps.data.outputs.image }}
+    #     docker image tag ${{ inputs.image }} ${{ steps.data.outputs.image_name }}
+    #     docker push ${{ steps.data.outputs.image_name }}
+
+    # - name: Git commit
+    #   shell: bash
+    #   working-directory: ./argocd
+    #   run: |
+    #     git config --local user.email "nandoin@live.com"
+    #     git config --local user.name "kustomize deploy"
+    #     git add .
+    #     git commit -am "deploy ${{ inputs.environment }} ${{ inputs.namespace }} ${{ inputs.name }} " || echo "Nothing to push"
+
+    - name: Pushes to another repository
+      uses: cpina/github-action-push-to-another-repository@main
+      env:
+        SSH_DEPLOY_KEY: ${{ inputs.github_token }}
+      with:
+        source-directory: "./argocd"
+        destination-github-username: "nandoin"
+        destination-repository-name: "argocd"
+        user-email: kustomize@argo.cd
+        target-branch: main
+
+    # - name: Git push
+    #   uses: ad-m/github-push-action@master
+    #   with:
+    #     github_token: ${{ inputs.github_token }}
+    #     branch: main
+    #     force: true
+    #     directory: ./argocd
+    #     repository: nandoin/argocd
+
+    # - name: Push Git Repo
+    #   shell: bash
+    #   env:
+    #     RETRIES: 3
+    #     COUNT: 0
+    #   working-directory: ./argocd
+    #   run: |
+    #     git config user.name action-deploy-${{ inputs.type }}
+    #     git config user.email action-deploy-${{ inputs.type }}@company.com
+    #     git add .
+    #     git status
+    #     git commit -m  "deploy ${{ inputs.environment }} ${{ inputs.namespace }} ${{ inputs.name }}" || echo "Nothing to push"
+    #     echo "git remote list"
+    #     git remote -v
+    #     echo "git remote remove"
+    #     git remote remove origin
+    #     echo "git remote add"
+    #     git remote add origin https://${{ inputs.github_token }}@github.com/nandoin/argocd.git
+    #     while [ $COUNT -lt $RETRIES ]; do
+    #       echo "Pushing ..."
+    #       set +e
+    #       git pull --rebase origin main && git push origin main; EC=$?
+    #       set -e
+    #       if [ $EC -eq 0 ]; then
+    #         RETRIES=0
+    #         break
+    #       fi
+    #       COUNT=$(($COUNT + 1))
+    #       sleep $((RANDOM % 10))
+    #       echo "Retrying $COUNT ..."
+    #     done
