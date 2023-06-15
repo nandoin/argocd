@@ -71,7 +71,7 @@ runs:
 
     - name: Apply Kustomize Project
       shell: bash
-      working-directory: ./argocd/deployments-multiple/${{ inputs.environment }}/${{ inputs.name }}
+      working-directory: .github/argocd/deployments-multiple/${{ inputs.environment }}/${{ inputs.name }}
       run: |
         rm -rf */kustomization.yaml
         for namespace in $(ls -d */ | cut -f1 -d"/"); do
