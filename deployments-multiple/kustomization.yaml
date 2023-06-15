@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- development/.gitkeep
+- production
+namespace: xx-samsung
+images:
+- name: deploy/image
+  newName: luizfernadomarques/api-gateway-fernando
+  newTag: 900b062106101e55505157616d08ef36be50fa91
