@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: xx-lebiscue
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: xx-lebiscue
