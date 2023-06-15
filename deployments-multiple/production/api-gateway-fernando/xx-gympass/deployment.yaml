@@ -23,4 +23,4 @@ spec:
             - containerPort: 8090
           envFrom:
             - configMapRef:
-                name: xx-gympass
+                name: configmap-xx-gympass
