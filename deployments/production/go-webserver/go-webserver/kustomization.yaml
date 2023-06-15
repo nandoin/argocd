@@ -8,4 +8,4 @@ namespace: go-webserver
 images:
 - name: deploy/image
   newName: luizfernadomarques/go-webserver
-  newTag: 918808dbaf24f188544c80deff0ab04c207d8377
+  newTag: 18019112ca7fd8e06b4d4f2ec230c586eaab56a1
