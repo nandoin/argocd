@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/nandoin/argocd.git
     targetRevision: HEAD
-    path: deployments/production/api-gateway-fernando/xx-samsung
+    path: deployments-multiple/production/api-gateway-fernando/xx-samsung
   destination:
     server: https://kubernetes.default.svc
     namespace: xx-samsung
