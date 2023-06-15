@@ -74,11 +74,12 @@ runs:
       run: |
         rm -rf */kustomization.yaml
         namespaces=$(ls -d */ | cut -f1 -d"/")
+        echo $namespaces
         for namespace in $namespaces; do
           pwd
           cd $namespace
           pwd
-          echo $namespace
+          echo $namespaces
           kustomize create --autodetect --recursive --namespace $(namespace)
           kustomize edit set image deploy/image=${{ steps.data.outputs.image_name }}
           cd ..
