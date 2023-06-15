@@ -44,7 +44,7 @@ runs:
 
     - name: Data
       shell: bash
-      working-directory: ./argocd
+      working-directory: .github/argocd
       id: data
       run: |
         echo "image=$(echo ${{ inputs.image }} | cut -f1 -d":")" >> $GITHUB_OUTPUT
