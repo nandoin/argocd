@@ -8,4 +8,4 @@ namespace: xx-samsung
 images:
 - name: deploy/image
   newName: luizfernadomarques/api-gateway-fernando
-  newTag: 0682bf308e927a2541b0df2e4968f34357e5bb5b
+  newTag: 62d3f9865c52924d8b87d8bae548106283949cd1
