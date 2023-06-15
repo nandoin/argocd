@@ -34,13 +34,13 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout nandoin/argocd
-      uses: actions/checkout@v3
-      with:
-        repository: nandoin/argocd
-        ref: main
-        #token: ${{ inputs.github_token }}
-        path: ./argocd
+    # - name: Checkout nandoin/argocd
+    #   uses: actions/checkout@v3
+    #   with:
+    #     repository: nandoin/argocd
+    #     ref: main
+    #     #token: ${{ inputs.github_token }}
+    #     path: ./argocd
 
     - name: Data
       shell: bash
