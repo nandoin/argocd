@@ -73,13 +73,9 @@ runs:
       working-directory: ./argocd/deployments-multiple/${{ inputs.environment }}/${{ inputs.name }}
       run: |
         rm -rf */kustomization.yaml
-        namespaces=$(ls -d */ | cut -f1 -d"/")
-        echo $namespaces
-        for namespace in $namespaces; do
-          pwd
+        for namespace in $(ls -d */ | cut -f1 -d"/"); do
           cd $namespace
-          pwd
-          echo $namespaces
+          echo $namespace
           kustomize create --autodetect --recursive --namespace $(namespace)
           kustomize edit set image deploy/image=${{ steps.data.outputs.image_name }}
           cd ..
