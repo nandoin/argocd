@@ -102,7 +102,7 @@ runs:
       env:
         SSH_DEPLOY_KEY: ${{ inputs.github_token }}
       with:
-        source-directory: "./argocd"
+        source-directory: ".github/argocd"
         destination-github-username: "nandoin"
         destination-repository-name: "argocd"
         user-email: kustomize@argo.cd
